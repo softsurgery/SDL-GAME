@@ -1,7 +1,11 @@
 #include "menu.h"
+#include "utils.h"
 #include <stdio.h>
+#include <malloc.h>
 
 const int SQUARE_SIZE = 100;
+const int BUTTON_WIDTH = 300;
+const int BUTTON_HEIGHT = 100;
 
 Menu *menu_init(SDL_Renderer *renderer)
 {
@@ -78,6 +82,35 @@ Menu *menu_init(SDL_Renderer *renderer)
     menu->destRect.x = (800 - SQUARE_SIZE) / 2;
     menu->destRect.y = (600 - SQUARE_SIZE) / 2;
 
+    // Load start button textures
+    menu->startButton.normalTexture = IMG_LoadTexture(renderer, "assets/images/start.png");
+    if (!menu->startButton.normalTexture)
+    {
+        printf("Failed to load start button texture! SDL_image Error: %s\n", IMG_GetError());
+        SDL_DestroyTexture(menu->squareTexture);
+        SDL_DestroyTexture(menu->bgTexture);
+        free(menu);
+        return NULL;
+    }
+
+    menu->startButton.hoverTexture = IMG_LoadTexture(renderer, "assets/images/start-hover.png");
+    if (!menu->startButton.hoverTexture)
+    {
+        printf("Failed to load start hover texture! SDL_image Error: %s\n", IMG_GetError());
+        SDL_DestroyTexture(menu->startButton.normalTexture);
+        SDL_DestroyTexture(menu->squareTexture);
+        SDL_DestroyTexture(menu->bgTexture);
+        free(menu);
+        return NULL;
+    }
+
+    // Initialize start button position and size (centered horizontally, positioned in lower half)
+    menu->startButton.destRect.w = BUTTON_WIDTH;
+    menu->startButton.destRect.h = BUTTON_HEIGHT;
+    menu->startButton.destRect.x = (800 - BUTTON_WIDTH) / 2;
+    menu->startButton.destRect.y = 450;
+    menu->startButton.isHovered = false;
+
     return menu;
 }
 
@@ -93,6 +126,15 @@ void menu_update(Menu *menu)
     }
 }
 
+void menu_render_start_button(Menu *menu, SDL_Renderer *renderer)
+{
+    if (!menu || !renderer)
+        return;
+
+    // Use the hoverElement utility to render start button with hover detection
+    hoverElement(&menu->startButton, renderer);
+}
+
 void menu_render(Menu *menu, SDL_Renderer *renderer)
 {
     if (!menu || !renderer)
@@ -104,6 +146,9 @@ void menu_render(Menu *menu, SDL_Renderer *renderer)
     // Render rotating square
     // Center is NULL (rotates around center), flip is NONE
     SDL_RenderCopyEx(renderer, menu->squareTexture, NULL, &menu->destRect, menu->angle, NULL, SDL_FLIP_NONE);
+
+    // Render start button
+    menu_render_start_button(menu, renderer);
 }
 
 void menu_destroy(Menu *menu)
@@ -111,6 +156,14 @@ void menu_destroy(Menu *menu)
     if (!menu)
         return;
 
+    if (menu->startButton.normalTexture)
+    {
+        SDL_DestroyTexture(menu->startButton.normalTexture);
+    }
+    if (menu->startButton.hoverTexture)
+    {
+        SDL_DestroyTexture(menu->startButton.hoverTexture);
+    }
     if (menu->squareTexture)
     {
         SDL_DestroyTexture(menu->squareTexture);

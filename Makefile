@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = $(shell sdl2-config --cflags) -Wall -Wextra
 LIBS = $(shell sdl2-config --libs) -lSDL2_image
 TARGET = app
-SRCS = main.c menu.c
+SRCS = main.c menu.c utils.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
