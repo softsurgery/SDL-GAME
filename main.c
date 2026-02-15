@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -40,6 +41,30 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // Initialize SDL_image
+    int imgFlags = IMG_INIT_JPG;
+    if (!(IMG_Init(imgFlags) & imgFlags))
+    {
+        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Load background texture
+    SDL_Texture *bgTexture = IMG_LoadTexture(renderer, "assets/images/bg.jpg");
+    if (!bgTexture)
+    {
+        printf("Failed to load background texture! SDL_image Error: %s\n", IMG_GetError());
+        // Handle error (cleanup and exit)
+        IMG_Quit();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
     // Create a surface with explicit masks for cross-platform compatibility
     Uint32 rmask, gmask, bmask, amask;
 
@@ -59,6 +84,11 @@ int main(int argc, char *argv[])
     if (!surface)
     {
         printf("Surface could not be created! SDL_Error: %s\n", SDL_GetError());
+        SDL_DestroyTexture(bgTexture);
+        IMG_Quit();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
@@ -66,6 +96,12 @@ int main(int argc, char *argv[])
     if (SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 255, 0, 0)) != 0)
     {
         printf("FillRect failed! SDL_Error: %s\n", SDL_GetError());
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(bgTexture);
+        IMG_Quit();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
@@ -76,6 +112,8 @@ int main(int argc, char *argv[])
     if (!texture)
     {
         printf("Texture could not be created! SDL_Error: %s\n", SDL_GetError());
+        SDL_DestroyTexture(bgTexture);
+        IMG_Quit();
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -107,8 +145,11 @@ int main(int argc, char *argv[])
         if (angle > 360.0)
             angle -= 360.0;
 
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x40, 0x48, 0xFF);
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
         SDL_RenderClear(renderer);
+
+        // Render background
+        SDL_RenderCopy(renderer, bgTexture, NULL, NULL);
 
         // Render rotating square
         SDL_RenderCopyEx(renderer, texture, NULL, &destRect, angle, NULL, SDL_FLIP_NONE);
@@ -117,6 +158,8 @@ int main(int argc, char *argv[])
     }
 
     SDL_DestroyTexture(texture);
+    SDL_DestroyTexture(bgTexture);
+    IMG_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

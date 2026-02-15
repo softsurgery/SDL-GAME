@@ -77,6 +77,15 @@ This document explains the SDL2 functions used in `main.c`.
 - **Arguments Used**:
   - `renderer`: The rendering context.
 
+### `SDL_RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect)`
+
+- **Description**: Copies a portion of the texture to the current rendering target.
+- **Arguments Used**:
+  - `renderer`: The rendering context.
+  - `bgTexture`: The background texture.
+  - `NULL`: The entire texture is used as the source.
+  - `NULL`: The texture is stretched to fill the entire rendering target.
+
 ### `SDL_RenderCopyEx(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect, double angle, const SDL_Point* center, SDL_RendererFlip flip)`
 
 - **Description**: Copies a portion of the texture to the current rendering target, with optional rotation and flipping.
@@ -143,3 +152,31 @@ This document explains the SDL2 functions used in `main.c`.
 - **Arguments Used**:
   - `&e`: Pointer to an `SDL_Event` structure to be filled with the next event from the queue.
 - **Returns**: 1 if there is a pending event, or 0 if there are none available.
+
+## SDL2_image Extension
+
+### `IMG_Init(int flags)`
+
+- **Description**: Initializes the SDL_image library with support for specified image formats.
+- **Arguments Used**:
+  - `IMG_INIT_JPG`: Initializes support for loading JPG images.
+- **Returns**: A bitmask of all the successfully initialized loaders.
+
+### `IMG_Quit(void)`
+
+- **Description**: Cleans up the SDL_image library. This should be called to free resources used by SDL_image.
+- **Arguments**: None.
+
+### `IMG_GetError(void)`
+
+- **Description**: Returns a message string containing information about the last internal SDL_image error.
+- **Arguments**: None.
+- **Returns**: A C-string describing the error.
+
+### `IMG_LoadTexture(SDL_Renderer* renderer, const char* file)`
+
+- **Description**: Loads an image from a file directly into a texture. This is a convenience function that combines loading a surface and creating a texture from it.
+- **Arguments Used**:
+  - `renderer`: The rendering context.
+  - `"assets/bg.jpg"`: Relative path to the image file to load.
+- **Returns**: A pointer to the created `SDL_Texture`, or `NULL` on failure.
